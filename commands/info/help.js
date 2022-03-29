@@ -14,11 +14,11 @@ module.exports = {
 
     run: async (client, interaction, args) => {
         let helpEmbed = new MessageEmbed()
-            .setTitle(` für den ${client.user.tag} -- Help`)
-            .setDescription(`JUST THE BUT DESCRIPTION`)
+            .setTitle(` Help for ${client.user.tag} -- Help`)
+            .setDescription(`DESCRIPTION`)
             .setColor("#00fff2")
             .setTimestamp()
-            .setFooter("By Fynnyx | github.com/Fynnyx")
+            .setFooter("By Aasjiel | github.com/aasjiel")
             
             client.slashCommands.map(value => {
                 helpEmbed.addField(value.name, value.description, true)
