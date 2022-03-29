@@ -1,0 +1,28 @@
+{
+  "name": "the-assistant",
+  "version": "0.0.1",
+  "description": "A bot made for Scheduling Event on Discord",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aasjiel/The-Assistant"
+  },
+  "author": "Aasjiel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Aasjiel/The-Assistant/issues"
+  },
+  "homepage": "https://github.com/Aasjiel/The-Assistant#readme",
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "discord-api-types": "^0.26.1",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "glob": "^7.2.0",
+    "nvm": "0.0.4"
+  }
+}
