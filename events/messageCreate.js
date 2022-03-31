@@ -1,5 +1,5 @@
 const client = require("../index")
 
 client.on("messageCreate", async message => {
-    console.log(message.author.displayName + "Has send a message with the value\n" + message.content);
+    console.log(message.author.username + " sent a message: " + message.content);
 })
