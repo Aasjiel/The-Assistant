@@ -34,11 +34,37 @@ module.exports = {
           type: "STRING",
           description: "Specify whether this event is External, voice or stage",
           required: true,
+          choices: [
+            {
+              name: "EXTERNAL",
+              value: "EXTERNAL",
+            },
+            {
+              name: "NONE",
+              value: "EXTERNAL",
+            },
+          ],
         },
         {
-          name: "channel",
+          name: "privacylevel",
           type: "STRING",
-          description: "Specify the channel the event takes place in.",
+          description: "Define if the event is publioc or guild only",
+          required: true,
+          choices: [
+            {
+              name: "PUBLIC",
+              value: "PUBLIC",
+            },
+            {
+              name: "GUILD_ONLY",
+              value: "GUILD_ONLY",
+            },
+          ],
+        },
+        {
+          name: "location",
+          type: "STRING",
+          description: "Specify the location the event takes place in.",
           required: true,
         },
         {
@@ -65,42 +91,35 @@ module.exports = {
    */
 
   run: async (client, interaction, args) => {
+    const guild = client.guilds.cache.get("840658907466039397");
     if (args[0] === "add") {
       const name = args[1];
       const description = args[2];
       const type = args[3];
-      const location = args[4];
-      const start = args[5];
-      const end = args[6];
+      const privacyLevel = args[4];
+      const location = args[5];
+      const start = args[6];
+      const end = args[7];
       if (!(await validateDate(start)) && !(await validateDate(end))) {
         return interaction.reply({
           content: "Invalid date format, please use DD/MM/YYYY",
         });
       }
-      let channel_id = interaction.channel;
 
       const newEvent = {
-        id: 1,
         name: name,
+        scheduledStartTime: start,
+        scheduledEndTime: end,
+        privacyLevel: privacyLevel,
+        entityType: type,
         description: description,
-        type: type,
-        location: location,
-        start: start,
-        end: end,
-        channel_id: client.channels.fetch('840658907466039401'),
-        id: 1,
+        entityMetadata: { location: location },
       };
 
-      let event = new GuildScheduledEvent(1, client.user.id, newEvent)
-        .setName("name")
-        .setDescription("description")
-        .setLocation("location")
-        .setScheduledStartTime("2022-03-30T07:24:29+00:00")
-        .setScheduledEndTime("2022-03-30T07:24:29+00:00")
-        .setStatus("SCHEDULED");
+      guild.scheduledEvents.create(newEvent);
 
       await interaction.reply({
-        content: event.toString(),
+        content: JSON.stringify(newEvent),
       });
     }
   },

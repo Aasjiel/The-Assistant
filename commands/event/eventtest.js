@@ -19,20 +19,18 @@ module.exports = {
    */
 
   run: async (client, interaction, args) => {
+    const guild = client.guilds.cache.get("840658907466039397");
 
-    
-    // let event = new GuildScheduledEvent(
-    //   client.user.id,
-    //   interaction.channel
-    // )
-    //   .setName("name")
-    //   .setDescription("description")
-    //   .setLocation("location")
-    //   .setScheduledStartTime("2022-03-30T07:24:29+00:00")
-    //   .setScheduledEndTime("2022-03-30T07:24:29+00:00")
-    //   .setStatus("SCHEDULED");
-    // await interaction.reply({
-    //   content: event.toString(),
-    // });
+    let event = {
+      name: "eventtest",
+      scheduledStartTime: "2022-06-01T00:00:00+00:00",
+      scheduledEndTime: "2022-06-01T02:00:00+00:00",
+      privacyLevel: "GUILD_ONLY",
+      entityType: "EXTERNAL",
+      description: "lorem ipsum",
+      entityMetadata: { location: "earth" },
+    };
+
+    guild.scheduledEvents.create(event);
   },
 };
