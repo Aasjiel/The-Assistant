@@ -132,7 +132,23 @@ module.exports = {
       guild.scheduledEvents.create(newEvent);
 
       await interaction.reply({
-        content: JSON.stringify(newEvent),
+        content:
+          "you created an event with the folowing details: \n name: " +
+          name +
+          "\n description: " +
+          description +
+          "\n type: " +
+          type +
+          "\n privacyLevel: " +
+          privacyLevel +
+          "\n location: " +
+          location +
+          "\n date: " +
+          date +
+          "\n start: " +
+          start +
+          "\n end: " +
+          end,
       });
     }
   },
