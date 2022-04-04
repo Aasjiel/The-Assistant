@@ -4,7 +4,7 @@ const {
   MessageEmbed,
   GuildScheduledEvent,
 } = require("discord.js");
-const { validateDate } = require("../../helpers/validate.js");
+const { validateDate, validateTime } = require("../../helpers/validate.js");
 const data = require(`${process.cwd()}/properties.json`);
 
 module.exports = {
@@ -68,16 +68,21 @@ module.exports = {
           required: true,
         },
         {
+          name: "date",
+          type: "STRING",
+          description: "Date the event starts in the format yyyy-mm-dd",
+          required: true,
+        },
+        {
           name: "start",
           type: "STRING",
-          description:
-            "Date and time the event starts in the format yyyy-mm-ddThh:mm:ss+hh:mm",
+          description: "Time the event starts in the format hh:mm:ss",
           required: true,
         },
         {
           name: "end",
           type: "STRING",
-          description: "Date and time the event ends",
+          description: "Time the event ends in the format hh:mm:ss",
           required: true,
         },
       ],
@@ -98,18 +103,26 @@ module.exports = {
       const type = args[3];
       const privacyLevel = args[4];
       const location = args[5];
-      const start = args[6];
-      const end = args[7];
-      if (!(await validateDate(start)) && !(await validateDate(end))) {
+      const date = args[6];
+      const start = args[7];
+      const end = args[8];
+      if (
+        !(await validateDate(date)) &&
+        !(await validateTime(end)) &&
+        !(await validateTime(start))
+      ) {
         return interaction.reply({
           content: "Invalid date format, please use DD/MM/YYYY",
         });
       }
 
+      const eventStart = date + "T" + start;
+      const eventEnd = date + "T" + end;
+
       const newEvent = {
         name: name,
-        scheduledStartTime: start,
-        scheduledEndTime: end,
+        scheduledStartTime: eventStart,
+        scheduledEndTime: eventEnd,
         privacyLevel: privacyLevel,
         entityType: type,
         description: description,
