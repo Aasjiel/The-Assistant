@@ -158,6 +158,26 @@ module.exports = {
         },
       ],
     },
+    {
+      name: "delete",
+      type: "SUB_COMMAND",
+      description: "find an event",
+      options: [
+        {
+          name: "name",
+          type: "STRING",
+          description: "The name of the event you want to delete",
+          required: true,
+        },
+        {
+          name: "id",
+          type: "STRING",
+          description:
+            "The id of the event you want to delete. If you don't know the id use /event find <name of the Event>",
+          required: true,
+        },
+      ],
+    },
   ],
 
   /**
@@ -456,46 +476,30 @@ module.exports = {
               });
             break;
         }
-        // console.log(eventNew);
-        // const startDate = new Converter.timestamp(
-        //   eventNew.scheduledStartTimestamp
-        // ).formatSeconds;
-        // const endDate =
-        //   eventNew.scheduledEndTimestamp !== null
-        //     ? new Converter.timestamp(eventNew.scheduledEndTimestamp)
-        //         .formatSeconds
-        //     : "no set enddate";
-        // const embed = new MessageEmbed()
-        //   .setTitle(eventNew.name)
-        //   .setDescription(
-        //     eventNew.description !== null
-        //       ? eventNew.description
-        //       : "no description given"
-        //   )
-        //   .setColor("FUCHSIA")
-        //   .addField("Type", eventNew.entityType, true)
-        //   .addField("ID", eventNew.id, true)
-        //   .addField(
-        //     "Location",
-        //     eventNew.entityMetadata !== null
-        //       ? eventNew.entityMetadata.location
-        //       : "no location given",
-        //     true
-        //   )
-        //   .addField("Start", startDate, true)
-        //   .addField("End", endDate, true)
-        //   .addField(
-        //     "Channel",
-        //     eventNew.channelId !== null
-        //       ? guild.channels.cache.get(eventNew.channelId).name
-        //       : "no channel given",
-        //     true
-        //   )
-        //   .setFooter(
-        //     `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
-        //   );
+      } else {
+        await interaction.reply({
+          content: "No event found with the name & id: " + name + " // " + id,
+        });
+      }
+    }
 
-        // await interaction.reply({ embeds: [embed] });
+    //----------------------------------------------------------------//
+    //                        delete SUBCOMMAND                       //
+    //----------------------------------------------------------------//
+
+    if (args[0] === "delete") {
+      const name = args[1];
+      const id = args[2];
+      const event = guild.scheduledEvents.cache.find(
+        (e) => e.name === name && e.id === id
+      );
+
+      if (event) {
+        event.delete().then(async (event) => {
+          await interaction.reply({
+            content: "The Event: " + name + " has been deleted",
+          });
+        });
       } else {
         await interaction.reply({
           content: "No event found with the name & id: " + name + " // " + id,
