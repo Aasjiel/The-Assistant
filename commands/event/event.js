@@ -32,7 +32,8 @@ module.exports = {
         {
           name: "type",
           type: "STRING",
-          description: "Specify whether this event is External, voice or stage",
+          description:
+            "Specify whether this event is External, in a voice chat or something else",
           required: true,
           choices: [
             {
@@ -40,32 +41,10 @@ module.exports = {
               value: "EXTERNAL",
             },
             {
-              name: "NONE",
-              value: "EXTERNAL",
+              name: "VOICE",
+              value: "VOICE",
             },
           ],
-        },
-        {
-          name: "privacylevel",
-          type: "STRING",
-          description: "Define if the event is publioc or guild only",
-          required: true,
-          choices: [
-            {
-              name: "PUBLIC",
-              value: "PUBLIC",
-            },
-            {
-              name: "GUILD_ONLY",
-              value: "GUILD_ONLY",
-            },
-          ],
-        },
-        {
-          name: "location",
-          type: "STRING",
-          description: "Specify the location the event takes place in.",
-          required: true,
         },
         {
           name: "date",
@@ -85,6 +64,18 @@ module.exports = {
           description: "Time the event ends in the format hh:mm:ss",
           required: true,
         },
+        {
+          name: "location",
+          type: "STRING",
+          description: "Specify the location the event takes place in.",
+          required: true,
+        },
+        {
+          name: "voicechannel",
+          type: "STRING",
+          description: "Specify the voiceChannel name the event takes place in.",
+          required: true,
+        },
       ],
     },
   ],
@@ -101,11 +92,12 @@ module.exports = {
       const name = args[1];
       const description = args[2];
       const type = args[3];
-      const privacyLevel = args[4];
-      const location = args[5];
-      const date = args[6];
-      const start = args[7];
-      const end = args[8];
+      const privacyLevel = "GUILD_ONLY";
+      const date = args[4];
+      const start = args[5];
+      const end = args[6];
+      const location = args[7];
+      const voicechannel = args[8];
       if (
         !(await validateDate(date)) &&
         !(await validateTime(end)) &&
@@ -115,6 +107,8 @@ module.exports = {
           content: "Invalid date format, please use DD/MM/YYYY",
         });
       }
+      const channelVal = guild.channels.cache.find(e => e.name === voicechannel);
+      const channelID = channelVal.id;
 
       const eventStart = date + "T" + start;
       const eventEnd = date + "T" + end;
@@ -127,6 +121,7 @@ module.exports = {
         entityType: type,
         description: description,
         entityMetadata: { location: location },
+        channel: channelID,
       };
 
       guild.scheduledEvents.create(newEvent);
@@ -143,6 +138,8 @@ module.exports = {
           privacyLevel +
           "\n location: " +
           location +
+          "\n voice channel: " +
+          voicechannel +
           "\n date: " +
           date +
           "\n start: " +
