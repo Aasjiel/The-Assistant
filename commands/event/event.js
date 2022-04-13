@@ -211,28 +211,13 @@ module.exports = {
         channel: channelID,
       };
 
-      guild.scheduledEvents.create(newEvent);
-
-      //create embed with all the info of newEvent
-
-      const embed = new MessageEmbed()
-        .setTitle(name)
-        .setThumbnail(
-          "https://i.gadgets360cdn.com/large/google_assistant_thumb_1620377753454.jpg"
-        )
-        .setDescription(description)
-        .setColor("#0099ff")
-        .addField("Date", date, true)
-        .addField("Start", start, true)
-        .addField("End", end, true)
-        .addField("Type", type, true)
-        .addField("Location", location, true)
-        .addField("VoiceChannel", voicechannel, true)
-        .setFooter(
-          `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
-        );
-
-      await interaction.reply({ embeds: [embed] });
+      guild.scheduledEvents.create(newEvent).then(async (event) => {
+        await interaction.reply({
+          content:
+            "https://discord.com/events/840658907466039397/" +
+            guild.scheduledEvents.cache.find((e) => e.name === name).id,
+        });
+      });
     }
 
     //----------------------------------------------------------------//
@@ -408,76 +393,109 @@ module.exports = {
       if (event) {
         switch (args[3]) {
           case "description":
-            guild.scheduledEvents.edit(event.id, {
-              description: param,
-            });
+            guild.scheduledEvents
+              .edit(event.id, {
+                description: param,
+              })
+              .then(async (event) => {
+                await interaction.reply({
+                  content:
+                    "https://discord.com/events/840658907466039397/" + id,
+                });
+              });
             break;
           case "start":
-            guild.scheduledEvents.edit(event.id, {
-              scheduledStartTime: param,
-            });
+            guild.scheduledEvents
+              .edit(event.id, {
+                scheduledStartTime: param,
+              })
+              .then(async (event) => {
+                await interaction.reply({
+                  content:
+                    "https://discord.com/events/840658907466039397/" + id,
+                });
+              });
             break;
 
           case "end":
-            guild.scheduledEvents.edit(event.id, {
-              scheduledEndTime: param,
-            });
+            guild.scheduledEvents
+              .edit(event.id, {
+                scheduledEndTime: param,
+              })
+              .then(async (event) => {
+                await interaction.reply({
+                  content:
+                    "https://discord.com/events/840658907466039397/" + id,
+                });
+              });
             break;
 
           case "location":
-            guild.scheduledEvents.edit(event.id, {
-              entityMetadata: { location: param },
-            });
+            guild.scheduledEvents
+              .edit(event.id, {
+                entityMetadata: { location: param },
+              })
+              .then(async (event) => {
+                await interaction.reply({
+                  content:
+                    "https://discord.com/events/840658907466039397/" + id,
+                });
+              });
             break;
 
           case "name":
-            guild.scheduledEvents.edit(event.id, {
-              name: param,
-            });
+            guild.scheduledEvents
+              .edit(event.id, {
+                name: param,
+              })
+              .then(async (event) => {
+                await interaction.reply({
+                  content:
+                    "https://discord.com/events/840658907466039397/" + id,
+                });
+              });
             break;
         }
+        // console.log(eventNew);
+        // const startDate = new Converter.timestamp(
+        //   eventNew.scheduledStartTimestamp
+        // ).formatSeconds;
+        // const endDate =
+        //   eventNew.scheduledEndTimestamp !== null
+        //     ? new Converter.timestamp(eventNew.scheduledEndTimestamp)
+        //         .formatSeconds
+        //     : "no set enddate";
+        // const embed = new MessageEmbed()
+        //   .setTitle(eventNew.name)
+        //   .setDescription(
+        //     eventNew.description !== null
+        //       ? eventNew.description
+        //       : "no description given"
+        //   )
+        //   .setColor("FUCHSIA")
+        //   .addField("Type", eventNew.entityType, true)
+        //   .addField("ID", eventNew.id, true)
+        //   .addField(
+        //     "Location",
+        //     eventNew.entityMetadata !== null
+        //       ? eventNew.entityMetadata.location
+        //       : "no location given",
+        //     true
+        //   )
+        //   .addField("Start", startDate, true)
+        //   .addField("End", endDate, true)
+        //   .addField(
+        //     "Channel",
+        //     eventNew.channelId !== null
+        //       ? guild.channels.cache.get(eventNew.channelId).name
+        //       : "no channel given",
+        //     true
+        //   )
+        //   .setFooter(
+        //     `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+        //   );
 
-        const eventNew = guild.scheduledEvents.cache.find(
-          (e) => e.id === id
-        );
-        console.log(eventNew);
-        const startDate = new Converter.timestamp(eventNew.scheduledStartTimestamp)
-          .formatSeconds;
-        const endDate =
-        eventNew.scheduledEndTimestamp !== null
-            ? new Converter.timestamp(eventNew.scheduledEndTimestamp).formatSeconds
-            : "no set enddate";
-        const embed = new MessageEmbed()
-          .setTitle(eventNew.name)
-          .setDescription(
-            eventNew.description !== null
-              ? eventNew.description
-              : "no description given"
-          )
-          .setColor("FUCHSIA")
-          .addField("Type", eventNew.entityType, true)
-          .addField("ID", eventNew.id, true)
-          .addField(
-            "Location",
-            eventNew.entityMetadata !== null
-              ? eventNew.entityMetadata.location
-              : "no location given",
-            true
-          )
-          .addField("Start", startDate, true)
-          .addField("End", endDate, true)
-          .addField(
-            "Channel",
-            eventNew.channelId !== null
-              ? guild.channels.cache.get(eventNew.channelId).name
-              : "no channel given",
-            true
-          )
-          .setFooter(
-            `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
-          );
-
-        await interaction.reply({ embeds: [embed] });
+        // await interaction.reply({ embeds: [embed] });
       } else {
         await interaction.reply({
           content: "No event found with the name & id: " + name + " // " + id,
