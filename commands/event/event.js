@@ -2,10 +2,15 @@ const {
   Client,
   CommandInteraction,
   MessageEmbed,
-  GuildScheduledEvent,
+  Message,
 } = require("discord.js");
-const { validateDate, validateTime } = require("../../helpers/validate.js");
+const {
+  validateDate,
+  validateTime,
+  validateSameNameEvents,
+} = require("../../helpers/validate.js");
 const data = require(`${process.cwd()}/properties.json`);
+const Converter = require("timestamp-conv");
 
 module.exports = {
   name: "event",
@@ -73,8 +78,53 @@ module.exports = {
         {
           name: "voicechannel",
           type: "STRING",
-          description: "Specify the voiceChannel name the event takes place in.",
+          description:
+            "Specify the voiceChannel name the event takes place in.",
           required: true,
+        },
+      ],
+    },
+    {
+      name: "find",
+      type: "SUB_COMMAND",
+      description: "find an event",
+      options: [
+        {
+          name: "name",
+          type: "STRING",
+          description: "The name of the event",
+          required: true,
+        },
+        {
+          name: "date",
+          type: "STRING",
+          description: "Date the event starts in the format yyyy-mm-dd",
+          required: false,
+        },
+      ],
+    },
+    {
+      name: "edit",
+      type: "SUB_COMMAND",
+      description: "find an event",
+      options: [
+        {
+          name: "name",
+          type: "STRING",
+          description: "The name of the event",
+          required: true,
+        },
+        {
+          name: "id",
+          type: "STRING",
+          description: "The id of the event",
+          required: false,
+        },
+        {
+          name: "date",
+          type: "STRING",
+          description: "Date the event starts in the format yyyy-mm-dd",
+          required: false,
         },
       ],
     },
@@ -88,6 +138,11 @@ module.exports = {
 
   run: async (client, interaction, args) => {
     const guild = client.guilds.cache.get("840658907466039397");
+
+    //----------------------------------------------------------------//
+    //                        add SUBCOMMAND                          //
+    //----------------------------------------------------------------//
+
     if (args[0] === "add") {
       const name = args[1];
       const description = args[2];
@@ -107,7 +162,9 @@ module.exports = {
           content: "Invalid date format, please use DD/MM/YYYY",
         });
       }
-      const channelVal = guild.channels.cache.find(e => e.name === voicechannel);
+      const channelVal = guild.channels.cache.find(
+        (e) => e.name === voicechannel
+      );
       const channelID = channelVal.id;
 
       const eventStart = date + "T" + start;
@@ -147,6 +204,106 @@ module.exports = {
           "\n end: " +
           end,
       });
+    }
+
+    //----------------------------------------------------------------//
+    //                        find SUBCOMMAND                         //
+    //----------------------------------------------------------------//
+
+    if (args[0] === "find") {
+      const name = args[1];
+      const event = guild.scheduledEvents.cache.find((e) => e.name === name);
+      function sameNameEvents() {
+        const sameNameEvents = guild.scheduledEvents.cache.filter(
+          (e) => e.name === name
+        );
+        return sameNameEvents.size > 1;
+      }
+
+      if (event && !sameNameEvents()) {
+        const startDate = new Converter.timestamp(event.scheduledStartTimestamp)
+          .formatSeconds;
+        const endDate =
+          event.scheduledEndTimestamp !== null
+            ? new Converter.timestamp(event.scheduledEndTimestamp).formatSeconds
+            : "no set enddate";
+        const embed = new MessageEmbed()
+          .setTitle(event.name)
+          .setDescription(
+            event.description !== null
+              ? event.description
+              : "no description given"
+          )
+          .setColor("FUCHSIA")
+          // .setThumbnail(
+          //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
+          // )
+          .addField("Type", event.entityType, true)
+          .addField("ID", event.id, true)
+          .addField(
+            "Location",
+            event.entityMetadata !== null
+              ? event.entityMetadata.location
+              : "no location given",
+            true
+          )
+          .addField("Start", startDate, true)
+          .addField("End", endDate, true)
+          .addField(
+            "Channel",
+            event.channelId !== null
+              ? guild.channels.cache.get(event.channelId).name
+              : "no channel given",
+            true
+          )
+          .setFooter(
+            `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+          );
+        await interaction.reply({ embeds: [embed] });
+      } else if (!event) {
+        await interaction.reply({
+          content: "No event found with the name: " + name,
+        });
+      } else {
+        await interaction.reply({
+          content:
+            "There are multiple events with the name: " +
+            name +
+            " please specify the date of the event",
+        });
+      }
+    }
+
+    //----------------------------------------------------------------//
+    //                        edit SUBCOMMAND                         //
+    //----------------------------------------------------------------//
+
+    if (args[0] === "edit") {
+      const name = args[1];
+      const event = guild.scheduledEvents.cache.find((e) => e.name === name);
+      const eventById = guild.scheduledEvents.cache.find((e) => e.id === id);
+      function sameNameEvents() {
+        const sameNameEvents = guild.scheduledEvents.cache.filter(
+          (e) => e.name === name
+        );
+        return sameNameEvents.size > 1;
+      }
+
+      if (event && !sameNameEvents() || eventById) {
+       
+        await interaction.reply(event || eventById);
+      } else if (!event) {
+        await interaction.reply({
+          content: "No event found with the name: " + name,
+        });
+      } else {
+        await interaction.reply({
+          content:
+            "There are multiple events with the name: " +
+            name +
+            " please specify the date of the event",
+        });
+      }
     }
   },
 };
