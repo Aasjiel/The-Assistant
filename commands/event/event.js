@@ -15,7 +15,7 @@ const { sleep } = require("../../helpers/sleep.js");
 
 module.exports = {
   name: "event",
-  description: "event",
+  description: "Create, find, edit or delete events.",
   type: "CHAT_INPUT",
   options: [
     {

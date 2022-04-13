@@ -7,7 +7,7 @@ const data = require(`${process.cwd()}/properties.json`);
 
 module.exports = {
   name: "eventtest",
-  description: "event",
+  description: "Test command with hardcoded data.",
   type: "CHAT_INPUT",
 
   /**
