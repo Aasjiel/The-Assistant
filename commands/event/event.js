@@ -11,6 +11,7 @@ const {
 } = require("../../helpers/validate.js");
 const data = require(`${process.cwd()}/properties.json`);
 const Converter = require("timestamp-conv");
+const { sleep } = require("../../helpers/sleep.js");
 
 module.exports = {
   name: "event",
@@ -96,9 +97,9 @@ module.exports = {
           required: true,
         },
         {
-          name: "date",
+          name: "id",
           type: "STRING",
-          description: "Date the event starts in the format yyyy-mm-dd",
+          description: "id of the event",
           required: false,
         },
       ],
@@ -117,14 +118,43 @@ module.exports = {
         {
           name: "id",
           type: "STRING",
-          description: "The id of the event",
-          required: false,
+          description:
+            "Provide the id of the event. If you don't know the id use /event find <name of the Event>",
+          required: true,
         },
         {
-          name: "date",
+          name: "attribute",
           type: "STRING",
-          description: "Date the event starts in the format yyyy-mm-dd",
-          required: false,
+          description: "The attribute you want to edit",
+          required: true,
+          choices: [
+            {
+              name: "name",
+              value: "name",
+            },
+            {
+              name: "description",
+              value: "description",
+            },
+            {
+              name: "start",
+              value: "start",
+            },
+            {
+              name: "end",
+              value: "end",
+            },
+            {
+              name: "location",
+              value: "location",
+            },
+          ],
+        },
+        {
+          name: "value",
+          type: "STRING",
+          description: "The new value of event attribute",
+          required: true,
         },
       ],
     },
@@ -183,27 +213,26 @@ module.exports = {
 
       guild.scheduledEvents.create(newEvent);
 
-      await interaction.reply({
-        content:
-          "you created an event with the folowing details: \n name: " +
-          name +
-          "\n description: " +
-          description +
-          "\n type: " +
-          type +
-          "\n privacyLevel: " +
-          privacyLevel +
-          "\n location: " +
-          location +
-          "\n voice channel: " +
-          voicechannel +
-          "\n date: " +
-          date +
-          "\n start: " +
-          start +
-          "\n end: " +
-          end,
-      });
+      //create embed with all the info of newEvent
+
+      const embed = new MessageEmbed()
+        .setTitle(name)
+        .setThumbnail(
+          "https://i.gadgets360cdn.com/large/google_assistant_thumb_1620377753454.jpg"
+        )
+        .setDescription(description)
+        .setColor("#0099ff")
+        .addField("Date", date, true)
+        .addField("Start", start, true)
+        .addField("End", end, true)
+        .addField("Type", type, true)
+        .addField("Location", location, true)
+        .addField("VoiceChannel", voicechannel, true)
+        .setFooter(
+          `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+        );
+
+      await interaction.reply({ embeds: [embed] });
     }
 
     //----------------------------------------------------------------//
@@ -246,9 +275,6 @@ module.exports = {
                   : "no description given"
               )
               .setColor("FUCHSIA")
-              // .setThumbnail(
-              //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
-              // )
               .addField("Type", eventById.entityType, true)
               .addField("ID", eventById.id, true)
               .addField(
@@ -272,7 +298,7 @@ module.exports = {
               );
             await interaction.reply({ embeds: [embed] });
             break;
-          case (event && !sameNameEvents()):
+          case event && !sameNameEvents():
             const startDateByName = new Converter.timestamp(
               event.scheduledStartTimestamp
             ).formatSeconds;
@@ -289,9 +315,6 @@ module.exports = {
                   : "no description given"
               )
               .setColor("FUCHSIA")
-              // .setThumbnail(
-              //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
-              // )
               .addField("Type", event.entityType, true)
               .addField("ID", event.id, true)
               .addField(
@@ -338,9 +361,6 @@ module.exports = {
                 : "no description given"
             )
             .setColor("FUCHSIA")
-            // .setThumbnail(
-            //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
-            // )
             .addField("Type", event.entityType, true)
             .addField("ID", event.id, true)
             .addField(
@@ -379,27 +399,88 @@ module.exports = {
 
     if (args[0] === "edit") {
       const name = args[1];
-      const event = guild.scheduledEvents.cache.find((e) => e.name === name);
-      const eventById = guild.scheduledEvents.cache.find((e) => e.id === id);
-      function sameNameEvents() {
-        const sameNameEvents = guild.scheduledEvents.cache.filter(
-          (e) => e.name === name
-        );
-        return sameNameEvents.size > 1;
-      }
+      const id = args[2];
+      const param = args[4];
+      const event = guild.scheduledEvents.cache.find(
+        (e) => e.name === name && e.id === id
+      );
 
-      if ((event && !sameNameEvents()) || eventById) {
-        await interaction.reply(event || eventById);
-      } else if (!event) {
-        await interaction.reply({
-          content: "No event found with the name: " + name,
-        });
+      if (event) {
+        switch (args[3]) {
+          case "description":
+            guild.scheduledEvents.edit(event.id, {
+              description: param,
+            });
+            break;
+          case "start":
+            guild.scheduledEvents.edit(event.id, {
+              scheduledStartTime: param,
+            });
+            break;
+
+          case "end":
+            guild.scheduledEvents.edit(event.id, {
+              scheduledEndTime: param,
+            });
+            break;
+
+          case "location":
+            guild.scheduledEvents.edit(event.id, {
+              entityMetadata: { location: param },
+            });
+            break;
+
+          case "name":
+            guild.scheduledEvents.edit(event.id, {
+              name: param,
+            });
+            break;
+        }
+
+        const eventNew = guild.scheduledEvents.cache.find(
+          (e) => e.id === id
+        );
+        console.log(eventNew);
+        const startDate = new Converter.timestamp(eventNew.scheduledStartTimestamp)
+          .formatSeconds;
+        const endDate =
+        eventNew.scheduledEndTimestamp !== null
+            ? new Converter.timestamp(eventNew.scheduledEndTimestamp).formatSeconds
+            : "no set enddate";
+        const embed = new MessageEmbed()
+          .setTitle(eventNew.name)
+          .setDescription(
+            eventNew.description !== null
+              ? eventNew.description
+              : "no description given"
+          )
+          .setColor("FUCHSIA")
+          .addField("Type", eventNew.entityType, true)
+          .addField("ID", eventNew.id, true)
+          .addField(
+            "Location",
+            eventNew.entityMetadata !== null
+              ? eventNew.entityMetadata.location
+              : "no location given",
+            true
+          )
+          .addField("Start", startDate, true)
+          .addField("End", endDate, true)
+          .addField(
+            "Channel",
+            eventNew.channelId !== null
+              ? guild.channels.cache.get(eventNew.channelId).name
+              : "no channel given",
+            true
+          )
+          .setFooter(
+            `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+          );
+
+        await interaction.reply({ embeds: [embed] });
       } else {
         await interaction.reply({
-          content:
-            "There are multiple events with the name: " +
-            name +
-            " please specify the date of the event",
+          content: "No event found with the name & id: " + name + " // " + id,
         });
       }
     }
