@@ -212,7 +212,14 @@ module.exports = {
 
     if (args[0] === "find") {
       const name = args[1];
+      const id = args[2];
       const event = guild.scheduledEvents.cache.find((e) => e.name === name);
+      const eventById = guild.scheduledEvents.cache.find((e) => e.id === id);
+      // console.log(event);
+      console.log(eventById);
+      const eventArray = guild.scheduledEvents.cache.filter(
+        (e) => e.name === name
+      );
       function sameNameEvents() {
         const sameNameEvents = guild.scheduledEvents.cache.filter(
           (e) => e.name === name
@@ -220,56 +227,148 @@ module.exports = {
         return sameNameEvents.size > 1;
       }
 
-      if (event && !sameNameEvents()) {
-        const startDate = new Converter.timestamp(event.scheduledStartTimestamp)
-          .formatSeconds;
-        const endDate =
-          event.scheduledEndTimestamp !== null
-            ? new Converter.timestamp(event.scheduledEndTimestamp).formatSeconds
-            : "no set enddate";
-        const embed = new MessageEmbed()
-          .setTitle(event.name)
-          .setDescription(
-            event.description !== null
-              ? event.description
-              : "no description given"
-          )
-          .setColor("FUCHSIA")
-          // .setThumbnail(
-          //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
-          // )
-          .addField("Type", event.entityType, true)
-          .addField("ID", event.id, true)
-          .addField(
-            "Location",
-            event.entityMetadata !== null
-              ? event.entityMetadata.location
-              : "no location given",
-            true
-          )
-          .addField("Start", startDate, true)
-          .addField("End", endDate, true)
-          .addField(
-            "Channel",
-            event.channelId !== null
-              ? guild.channels.cache.get(event.channelId).name
-              : "no channel given",
-            true
-          )
-          .setFooter(
-            `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
-          );
-        await interaction.reply({ embeds: [embed] });
+      if (eventById || (event && !sameNameEvents())) {
+        switch (eventById || (event && !sameNameEvents())) {
+          case eventById:
+            const startDate = new Converter.timestamp(
+              eventById.scheduledStartTimestamp
+            ).formatSeconds;
+            const endDate =
+              eventById.scheduledEndTimestamp !== null
+                ? new Converter.timestamp(eventById.scheduledEndTimestamp)
+                    .formatSeconds
+                : "no set enddate";
+            const embed = new MessageEmbed()
+              .setTitle(event.name)
+              .setDescription(
+                eventById.description !== null
+                  ? eventById.description
+                  : "no description given"
+              )
+              .setColor("FUCHSIA")
+              // .setThumbnail(
+              //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
+              // )
+              .addField("Type", eventById.entityType, true)
+              .addField("ID", eventById.id, true)
+              .addField(
+                "Location",
+                eventById.entityMetadata !== null
+                  ? eventById.entityMetadata.location
+                  : "no location given",
+                true
+              )
+              .addField("Start", startDate, true)
+              .addField("End", endDate, true)
+              .addField(
+                "Channel",
+                event.channelId !== null
+                  ? guild.channels.cache.get(event.channelId).name
+                  : "no channel given",
+                true
+              )
+              .setFooter(
+                `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+              );
+            await interaction.reply({ embeds: [embed] });
+            break;
+          case (event && !sameNameEvents()):
+            const startDateByName = new Converter.timestamp(
+              event.scheduledStartTimestamp
+            ).formatSeconds;
+            const endDateByName =
+              event.scheduledEndTimestamp !== null
+                ? new Converter.timestamp(event.scheduledEndTimestamp)
+                    .formatSeconds
+                : "no set enddate";
+            const embedByName = new MessageEmbed()
+              .setTitle(event.name)
+              .setDescription(
+                event.description !== null
+                  ? event.description
+                  : "no description given"
+              )
+              .setColor("FUCHSIA")
+              // .setThumbnail(
+              //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
+              // )
+              .addField("Type", event.entityType, true)
+              .addField("ID", event.id, true)
+              .addField(
+                "Location",
+                event.entityMetadata !== null
+                  ? event.entityMetadata.location
+                  : "no location given",
+                true
+              )
+              .addField("Start", startDateByName, true)
+              .addField("End", endDateByName, true)
+              .addField(
+                "Channel",
+                event.channelId !== null
+                  ? guild.channels.cache.get(event.channelId).name
+                  : "no channel given",
+                true
+              )
+              .setFooter(
+                `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+              );
+            await interaction.reply({ embeds: [embedByName] });
+            break;
+        }
       } else if (!event) {
         await interaction.reply({
           content: "No event found with the name: " + name,
         });
       } else {
+        eventArray.forEach((event) => {
+          const startDate = new Converter.timestamp(
+            event.scheduledStartTimestamp
+          ).formatSeconds;
+          const endDate =
+            event.scheduledEndTimestamp !== null
+              ? new Converter.timestamp(event.scheduledEndTimestamp)
+                  .formatSeconds
+              : "no set enddate";
+          const embed = new MessageEmbed()
+            .setTitle(event.name)
+            .setDescription(
+              event.description !== null
+                ? event.description
+                : "no description given"
+            )
+            .setColor("FUCHSIA")
+            // .setThumbnail(
+            //   "https://cdn.discordapp.com/attachments/739240981805879072/739240981805879072/unknown.png"
+            // )
+            .addField("Type", event.entityType, true)
+            .addField("ID", event.id, true)
+            .addField(
+              "Location",
+              event.entityMetadata !== null
+                ? event.entityMetadata.location
+                : "no location given",
+              true
+            )
+            .addField("Start", startDate, true)
+            .addField("End", endDate, true)
+            .addField(
+              "Channel",
+              event.channelId !== null
+                ? guild.channels.cache.get(event.channelId).name
+                : "no channel given",
+              true
+            )
+            .setFooter(
+              `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
+            );
+          interaction.channel.send({ embeds: [embed] });
+        });
         await interaction.reply({
           content:
             "There are multiple events with the name: " +
             name +
-            " please specify the date of the event",
+            " please specify the id of the event",
         });
       }
     }
@@ -289,8 +388,7 @@ module.exports = {
         return sameNameEvents.size > 1;
       }
 
-      if (event && !sameNameEvents() || eventById) {
-       
+      if ((event && !sameNameEvents()) || eventById) {
         await interaction.reply(event || eventById);
       } else if (!event) {
         await interaction.reply({
