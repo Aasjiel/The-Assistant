@@ -2,7 +2,6 @@ const {
   Client,
   CommandInteraction,
   MessageEmbed,
-  Message,
 } = require("discord.js");
 const {
   validateDate,
@@ -187,7 +186,9 @@ module.exports = {
    */
 
   run: async (client, interaction, args) => {
-    const guild = client.guilds.cache.get("840658907466039397");
+    const guildID = interaction.guildId
+
+    const guild = client.guilds.cache.get(guildID);
 
     //----------------------------------------------------------------//
     //                        add SUBCOMMAND                          //
@@ -234,7 +235,7 @@ module.exports = {
       guild.scheduledEvents.create(newEvent).then(async (event) => {
         await interaction.reply({
           content:
-            "https://discord.com/events/840658907466039397/" +
+            `https://discord.com/events/${guildID}/` +
             guild.scheduledEvents.cache.find((e) => e.name === name).id,
         });
       });
@@ -420,7 +421,7 @@ module.exports = {
               .then(async (event) => {
                 await interaction.reply({
                   content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                    `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -432,7 +433,7 @@ module.exports = {
               .then(async (event) => {
                 await interaction.reply({
                   content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -445,7 +446,7 @@ module.exports = {
               .then(async (event) => {
                 await interaction.reply({
                   content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -458,7 +459,7 @@ module.exports = {
               .then(async (event) => {
                 await interaction.reply({
                   content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -471,7 +472,7 @@ module.exports = {
               .then(async (event) => {
                 await interaction.reply({
                   content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
