@@ -1,9 +1,4 @@
-const {
-  Client,
-  CommandInteraction,
-  MessageEmbed,
-  Message,
-} = require("discord.js");
+const { Client, CommandInteraction, MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
 const {
   validateDate,
   validateTime,
@@ -12,6 +7,7 @@ const {
 const data = require(`${process.cwd()}/properties.json`);
 const Converter = require("timestamp-conv");
 const { sleep } = require("../../helpers/sleep.js");
+
 
 module.exports = {
   name: "event",
@@ -78,7 +74,8 @@ module.exports = {
         },
         {
           name: "voicechannel",
-          type: "STRING",
+          type: "CHANNEL",
+          channelTypes: ["GUILD_VOICE"],
           description:
             "Specify the voiceChannel name the event takes place in.",
           required: true,
@@ -187,7 +184,9 @@ module.exports = {
    */
 
   run: async (client, interaction, args) => {
-    const guild = client.guilds.cache.get("840658907466039397");
+    const guildID = interaction.guildId;
+
+    const guild = client.guilds.cache.get(guildID);
 
     //----------------------------------------------------------------//
     //                        add SUBCOMMAND                          //
@@ -212,10 +211,22 @@ module.exports = {
           content: "Invalid date format, please use DD/MM/YYYY",
         });
       }
+    //    function sameNameEvents() {
+    //      const sameNameEvent = guild.scheduledEvents.cache.filter(
+    //        (e) => e.name === name
+    //      );
+    //      return sameNameEvent.size >= 1 ? true : false;
+    //    }
+    //   if (sameNameEvents()){
+    //     return interaction.reply({
+    //       content: "An event white the same name already exists",
+    //     });
+    //   }
       const channelVal = guild.channels.cache.find(
         (e) => e.name === voicechannel
       );
-      const channelID = channelVal.id;
+      // const channelID = channelVal.id;
+      const channelID = voicechannel;
 
       const eventStart = date + "T" + start;
       const eventEnd = date + "T" + end;
@@ -231,11 +242,20 @@ module.exports = {
         channel: channelID,
       };
 
+      const row = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId('event-start')
+					.setLabel('Primary')
+					.setStyle('PRIMARY'),
+			);
+
       guild.scheduledEvents.create(newEvent).then(async (event) => {
         await interaction.reply({
           content:
-            "https://discord.com/events/840658907466039397/" +
+            `https://discord.com/events/${guildID}/` +
             guild.scheduledEvents.cache.find((e) => e.name === name).id,
+          components: [row]
         });
       });
     }
@@ -249,18 +269,18 @@ module.exports = {
       const id = args[2];
       const event = guild.scheduledEvents.cache.find((e) => e.name === name);
       const eventById = guild.scheduledEvents.cache.find((e) => e.id === id);
-      // console.log(event);
-      console.log(eventById);
       const eventArray = guild.scheduledEvents.cache.filter(
         (e) => e.name === name
       );
+      console.log(eventById)
       function sameNameEvents() {
         const sameNameEvents = guild.scheduledEvents.cache.filter(
           (e) => e.name === name
         );
-        return sameNameEvents.size > 1;
+        return sameNameEvents.size >= 1;
       }
-
+    //   console.log(event)
+    //   console.log(event && !sameNameEvents())
       if (eventById || (event && !sameNameEvents())) {
         switch (eventById || (event && !sameNameEvents())) {
           case eventById:
@@ -272,6 +292,7 @@ module.exports = {
                 ? new Converter.timestamp(eventById.scheduledEndTimestamp)
                     .formatSeconds
                 : "no set enddate";
+            console.log(eventById.entityType)
             const embed = new MessageEmbed()
               .setTitle(event.name)
               .setDescription(
@@ -280,8 +301,8 @@ module.exports = {
                   : "no description given"
               )
               .setColor("FUCHSIA")
-              .addField("Type", eventById.entityType, true)
-              .addField("ID", eventById.id, true)
+              .addField("Type", eventById?.entityType, true)
+              .addField("ID", eventById?.id, true)
               .addField(
                 "Location",
                 eventById.entityMetadata !== null
@@ -320,25 +341,25 @@ module.exports = {
                   : "no description given"
               )
               .setColor("FUCHSIA")
-              .addField("Type", event.entityType, true)
-              .addField("ID", event.id, true)
-              .addField(
+              .addFields("Type", event.entityType, true)
+              .addFields("ID", event.id, true)
+              .addFields(
                 "Location",
                 event.entityMetadata !== null
                   ? event.entityMetadata.location
                   : "no location given",
                 true
               )
-              .addField("Start", startDateByName, true)
-              .addField("End", endDateByName, true)
-              .addField(
+              .addFields("Start", startDateByName, true)
+              .addFields("End", endDateByName, true)
+              .addFields(
                 "Channel",
                 event.channelId !== null
                   ? guild.channels.cache.get(event.channelId).name
                   : "no channel given",
                 true
               )
-              .setFooter(
+              .setFooters(
                 `By ${client.user.username} | github.com/Aasjiel/The-Assistant`
               );
             await interaction.reply({ embeds: [embedByName] });
@@ -419,8 +440,7 @@ module.exports = {
               })
               .then(async (event) => {
                 await interaction.reply({
-                  content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  content: `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -431,8 +451,7 @@ module.exports = {
               })
               .then(async (event) => {
                 await interaction.reply({
-                  content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  content: `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -444,8 +463,7 @@ module.exports = {
               })
               .then(async (event) => {
                 await interaction.reply({
-                  content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  content: `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -457,8 +475,7 @@ module.exports = {
               })
               .then(async (event) => {
                 await interaction.reply({
-                  content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  content: `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
@@ -470,8 +487,7 @@ module.exports = {
               })
               .then(async (event) => {
                 await interaction.reply({
-                  content:
-                    "https://discord.com/events/840658907466039397/" + id,
+                  content: `https://discord.com/events/${guildID}/` + id,
                 });
               });
             break;
